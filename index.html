@@ -14,26 +14,37 @@
     -webkit-user-select: none;
   }
 
-  html, body {
-    height: 100%;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  :root {
+    /* Circle respects BOTH width and height, so square screens
+       (e.g. Galaxy Fold inner display) never overflow vertically. */
+    --circle: min(72vw, 46vh, 360px);
   }
 
+  html { height: 100%; }
+
   body {
+    min-height: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: linear-gradient(160deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     color: #fff;
     text-align: center;
     padding: 20px;
     touch-action: manipulation;
+    overscroll-behavior: none;
+  }
+
+  .app {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* room for the tap finger that hangs below the circle */
+    padding-bottom: calc(var(--circle) * 0.14);
   }
 
   .logo {
-    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-size: clamp(1.4rem, 4vmin, 2.2rem);
     font-weight: 800;
     letter-spacing: 2px;
     margin-bottom: 8px;
@@ -41,23 +52,23 @@
   .logo span { color: #6ee7ff; }
 
   .tagline {
-    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    font-size: clamp(0.9rem, 2.5vmin, 1.2rem);
     opacity: 0.7;
-    margin-bottom: 40px;
+    margin-bottom: clamp(16px, 4vh, 40px);
   }
 
   .instruction {
-    font-size: clamp(1.4rem, 4.5vw, 2.2rem);
+    font-size: clamp(1.3rem, 4.5vmin, 2.2rem);
     font-weight: 700;
-    margin-bottom: 34px;
+    margin-bottom: clamp(14px, 3.5vh, 34px);
     min-height: 1.4em;
   }
 
   /* ====== THE BIG CIRCLE BUTTON ====== */
   .breath-btn {
     position: relative;
-    width: min(72vw, 360px);
-    height: min(72vw, 360px);
+    width: var(--circle);
+    height: var(--circle);
     border-radius: 50%;
     border: none;
     cursor: pointer;
@@ -74,12 +85,14 @@
   }
   .breath-btn:active { transform: scale(0.95); }
 
+  /* All inner text scales with the circle itself, so every
+     aspect ratio keeps the same proportions. */
   .breath-btn .big-label {
-    font-size: clamp(2.4rem, 9vw, 3.8rem);
+    font-size: calc(var(--circle) * 0.17);
     letter-spacing: 3px;
   }
   .breath-btn .sub-label {
-    font-size: clamp(1rem, 3.2vw, 1.35rem);
+    font-size: calc(var(--circle) * 0.062);
     font-weight: 600;
     opacity: 0.85;
   }
@@ -107,7 +120,7 @@
 
   .count-num {
     display: none;
-    font-size: clamp(8rem, 40vw, 15rem);
+    font-size: calc(var(--circle) * 0.6);
     font-weight: 900;
     line-height: 1;
     color: #000;
@@ -131,7 +144,7 @@
     position: absolute;
     bottom: -14%;
     left: 55%;
-    font-size: clamp(3.5rem, 15vw, 6rem);
+    font-size: calc(var(--circle) * 0.28);
     line-height: 1;
     pointer-events: none;
     filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
@@ -166,6 +179,7 @@
     padding: 16px;
     z-index: 100;
     backdrop-filter: blur(6px);
+    overflow-y: auto;
   }
   .overlay.show { display: flex; }
 
@@ -173,9 +187,10 @@
     background: linear-gradient(160deg, #1e1b4b, #312e81);
     border: 3px solid #fbbf24;
     border-radius: 28px;
-    padding: clamp(28px, 6vw, 56px);
+    padding: clamp(24px, 5vmin, 56px);
     max-width: 560px;
     width: 100%;
+    margin: auto;
     box-shadow: 0 0 120px rgba(251, 191, 36, 0.45);
     animation: slamIn 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
   }
@@ -185,12 +200,12 @@
   }
 
   .modal .lock {
-    font-size: clamp(3rem, 10vw, 4.5rem);
+    font-size: clamp(2.4rem, 8vmin, 4.5rem);
     margin-bottom: 10px;
   }
 
   .modal h2 {
-    font-size: clamp(1.7rem, 6vw, 2.6rem);
+    font-size: clamp(1.5rem, 5.5vmin, 2.6rem);
     font-weight: 900;
     color: #fbbf24;
     text-transform: uppercase;
@@ -199,29 +214,29 @@
   }
 
   .modal p {
-    font-size: clamp(1.05rem, 3.5vw, 1.35rem);
+    font-size: clamp(1rem, 3.2vmin, 1.35rem);
     line-height: 1.5;
     opacity: 0.92;
-    margin-bottom: 26px;
+    margin-bottom: clamp(14px, 3vh, 26px);
   }
 
   .modal .price {
-    font-size: clamp(2.6rem, 9vw, 4rem);
+    font-size: clamp(2.4rem, 8vmin, 4rem);
     font-weight: 900;
     color: #fff;
     margin-bottom: 4px;
   }
   .modal .price-sub {
-    font-size: clamp(0.9rem, 3vw, 1.1rem);
+    font-size: clamp(0.85rem, 2.6vmin, 1.1rem);
     opacity: 0.6;
-    margin-bottom: 28px;
+    margin-bottom: clamp(16px, 3.2vh, 28px);
   }
 
   .upgrade-btn {
     width: 100%;
-    padding: clamp(18px, 4vw, 26px);
+    padding: clamp(14px, 3.4vmin, 26px);
     font-family: inherit;
-    font-size: clamp(1.2rem, 4.5vw, 1.7rem);
+    font-size: clamp(1.1rem, 3.8vmin, 1.7rem);
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -241,13 +256,13 @@
     border: none;
     font-family: inherit;
     color: rgba(255, 255, 255, 0.45);
-    font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+    font-size: clamp(0.8rem, 2.2vmin, 0.95rem);
     cursor: pointer;
     text-decoration: underline;
   }
 
   .fine-print {
-    margin-top: 22px;
+    margin-top: clamp(12px, 2.5vh, 22px);
     font-size: 0.65rem;
     opacity: 0.35;
     line-height: 1.5;
@@ -260,19 +275,21 @@
 </head>
 <body>
 
-  <div class="logo">Breathe<span>OS</span>™</div>
-  <div class="tagline">Disrupting respiration since 2026</div>
+  <main class="app">
+    <div class="logo">Breathe<span>OS</span>™</div>
+    <div class="tagline">Disrupting respiration since 2026</div>
 
-  <div class="instruction" id="instruction">Press &amp; inhale</div>
+    <div class="instruction" id="instruction">Press &amp; inhale</div>
 
-  <button class="breath-btn inhale" id="circleBtn">
-    <span class="label-wrap">
-      <span class="big-label" id="bigLabel">INHALE</span>
-      <span class="sub-label" id="subLabel">press &amp; inhale</span>
-    </span>
-    <span class="count-num" id="countNum">3</span>
-    <span class="tap-hint">👆</span>
-  </button>
+    <button class="breath-btn inhale" id="circleBtn">
+      <span class="label-wrap">
+        <span class="big-label" id="bigLabel">INHALE</span>
+        <span class="sub-label" id="subLabel">press &amp; inhale</span>
+      </span>
+      <span class="count-num" id="countNum">3</span>
+      <span class="tap-hint">👆</span>
+    </button>
+  </main>
 
   <!-- ====== UPGRADE POPUP ====== -->
   <div class="overlay" id="overlay">
