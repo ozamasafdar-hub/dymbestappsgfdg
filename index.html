@@ -87,6 +87,10 @@
 
   /* All inner text scales with the circle itself, so every
      aspect ratio keeps the same proportions. */
+  .breath-btn .btn-icon {
+    font-size: calc(var(--circle) * 0.2);
+    line-height: 1;
+  }
   .breath-btn .big-label {
     font-size: calc(var(--circle) * 0.17);
     letter-spacing: 3px;
@@ -283,6 +287,7 @@
 
     <button class="breath-btn inhale" id="circleBtn">
       <span class="label-wrap">
+        <span class="btn-icon" id="btnIcon">🫁</span>
         <span class="big-label" id="bigLabel">INHALE</span>
         <span class="sub-label" id="subLabel">press &amp; inhale</span>
       </span>
@@ -311,6 +316,7 @@
 
 <script>
   const circleBtn   = document.getElementById('circleBtn');
+  const btnIcon     = document.getElementById('btnIcon');
   const bigLabel    = document.getElementById('bigLabel');
   const subLabel    = document.getElementById('subLabel');
   const countNum    = document.getElementById('countNum');
@@ -357,6 +363,7 @@
     state = 'exhale';
     circleBtn.classList.remove('counting');
     circleBtn.classList.add('exhale');
+    btnIcon.textContent = '😮‍💨';
     bigLabel.textContent = 'EXHALE';
     subLabel.textContent = 'press & exhale';
     instruction.textContent = 'Now exhale';
@@ -371,6 +378,7 @@
     state = 'inhale';
     circleBtn.classList.remove('exhale');
     circleBtn.classList.add('inhale');
+    btnIcon.textContent = '🫁';
     bigLabel.textContent = 'INHALE';
     subLabel.textContent = 'press & inhale';
     instruction.textContent = 'Press & inhale';
