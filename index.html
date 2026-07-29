@@ -107,33 +107,35 @@
     animation: pulse 2.2s ease-in-out infinite;
   }
 
-  .breath-btn.exhale {
-    background: radial-gradient(circle at 30% 30%, #4ade80, #15803d);
-    box-shadow: 0 0 60px rgba(74, 222, 128, 0.55);
-    animation: pulse 2.2s ease-in-out infinite;
-  }
-
-  /* Counting state: full white circle, giant black number inside */
-  .breath-btn.counting {
+  /* Holding state: white circle IS the exhale button — a live
+     breath-hold timer you press to stop holding. */
+  .breath-btn.holding {
     background: #ffffff;
     box-shadow: 0 0 100px rgba(255, 255, 255, 0.85);
     animation: none;
-    cursor: default;
   }
-  .breath-btn.counting:active { transform: none; }
 
   .count-num {
     display: none;
-    font-size: calc(var(--circle) * 0.6);
+    font-size: calc(var(--circle) * 0.52);
     font-weight: 900;
     line-height: 1;
     color: #000;
+    font-variant-numeric: tabular-nums;
   }
-  .breath-btn.counting .label-wrap { display: none; }
-  .breath-btn.counting .count-num {
+  .count-sub {
+    display: none;
+    font-size: calc(var(--circle) * 0.062);
+    font-weight: 700;
+    color: #000;
+    opacity: 0.65;
+  }
+  .breath-btn.holding .label-wrap { display: none; }
+  .breath-btn.holding .count-num {
     display: block;
     animation: pop 0.4s ease;
   }
+  .breath-btn.holding .count-sub { display: block; }
 
   .label-wrap {
     display: flex;
@@ -142,7 +144,7 @@
     gap: 8px;
   }
 
-  /* Tapping finger guide, shown only on the exhale button */
+  /* Tapping finger guide */
   .tap-hint {
     display: none;
     position: absolute;
@@ -155,7 +157,7 @@
     z-index: 5;
   }
   .breath-btn.inhale .tap-hint,
-  .breath-btn.exhale .tap-hint {
+  .breath-btn.holding .tap-hint {
     display: block;
     animation: tap 0.8s ease-in-out infinite;
   }
@@ -292,7 +294,8 @@
         <span class="big-label" id="bigLabel">Breathe in</span>
         <span class="sub-label" id="subLabel">press &amp; inhale</span>
       </span>
-      <span class="count-num" id="countNum">3</span>
+      <span class="count-num" id="countNum">1</span>
+      <span class="count-sub">press &amp; exhale</span>
       <span class="tap-hint">👆</span>
     </button>
   </main>
@@ -317,57 +320,43 @@
 
 <script>
   const circleBtn   = document.getElementById('circleBtn');
-  const btnIcon     = document.getElementById('btnIcon');
-  const bigLabel    = document.getElementById('bigLabel');
-  const subLabel    = document.getElementById('subLabel');
   const countNum    = document.getElementById('countNum');
   const instruction = document.getElementById('instruction');
   const overlay     = document.getElementById('overlay');
   const upgradeBtn  = document.getElementById('upgradeBtn');
   const declineBtn  = document.getElementById('declineBtn');
 
-  let state = 'inhale'; // inhale -> counting -> exhale
+  let state = 'inhale'; // inhale -> holding (timer + exhale button in one)
+  let seconds = 1;
+  let timer = null;
 
   circleBtn.addEventListener('click', () => {
-    if (state === 'inhale') startCountdown();
-    else if (state === 'exhale') overlay.classList.add('show');
+    if (state === 'inhale') startHolding();
+    else if (state === 'holding') overlay.classList.add('show');
   });
 
-  function startCountdown() {
-    state = 'counting';
+  function startHolding() {
+    state = 'holding';
     circleBtn.classList.remove('inhale');
-    circleBtn.classList.add('counting');
-    instruction.textContent = 'Inhaling… hold it';
+    circleBtn.classList.add('holding');
+    instruction.textContent = 'Holding… press to breathe out';
 
-    let count = 3;
-    showNumber(count);
+    seconds = 1;
+    showNumber(seconds);
 
-    const timer = setInterval(() => {
-      count--;
-      if (count > 0) {
-        showNumber(count);
-      } else {
-        clearInterval(timer);
-        becomeExhale();
-      }
+    // The timer never stops on its own — exhaling is a premium feature.
+    timer = setInterval(() => {
+      seconds++;
+      showNumber(seconds);
     }, 1000);
   }
 
   function showNumber(n) {
     countNum.textContent = n;
+    countNum.style.fontSize = n >= 100 ? 'calc(var(--circle) * 0.36)' : '';
     countNum.style.animation = 'none';
     void countNum.offsetWidth; // restart pop animation
     countNum.style.animation = 'pop 0.4s ease';
-  }
-
-  function becomeExhale() {
-    state = 'exhale';
-    circleBtn.classList.remove('counting');
-    circleBtn.classList.add('exhale');
-    btnIcon.textContent = '😮‍💨';
-    bigLabel.textContent = 'Breathe out';
-    subLabel.textContent = 'press & exhale';
-    instruction.textContent = 'Now exhale';
   }
 
   upgradeBtn.addEventListener('click', () => {
@@ -375,14 +364,9 @@
   });
 
   declineBtn.addEventListener('click', () => {
+    // No exhale for you — back to the still-running breath-hold timer.
     overlay.classList.remove('show');
-    state = 'inhale';
-    circleBtn.classList.remove('exhale');
-    circleBtn.classList.add('inhale');
-    btnIcon.textContent = '🫁';
-    bigLabel.textContent = 'Breathe in';
-    subLabel.textContent = 'press & inhale';
-    instruction.textContent = 'Press & inhale';
+    instruction.textContent = 'Still holding…';
     upgradeBtn.textContent = 'Upgrade to Exhale';
   });
 </script>
