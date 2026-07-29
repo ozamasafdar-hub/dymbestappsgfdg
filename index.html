@@ -154,6 +154,7 @@
     filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
     z-index: 5;
   }
+  .breath-btn.inhale .tap-hint,
   .breath-btn.exhale .tap-hint {
     display: block;
     animation: tap 0.8s ease-in-out infinite;
@@ -273,7 +274,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .breath-btn, .upgrade-btn, .breath-btn.exhale .tap-hint { animation: none; }
+    .breath-btn, .upgrade-btn, .tap-hint { animation: none; }
   }
 </style>
 </head>
