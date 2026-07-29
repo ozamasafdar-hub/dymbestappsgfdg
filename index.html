@@ -17,7 +17,7 @@
   :root {
     /* Circle respects BOTH width and height, so square screens
        (e.g. Galaxy Fold inner display) never overflow vertically. */
-    --circle: min(72vw, 46vh, 360px);
+    --circle: min(68vw, 42vh, 340px);
   }
 
   html { height: 100%; }
@@ -47,22 +47,46 @@
     font-size: clamp(1.4rem, 4vmin, 2.2rem);
     font-weight: 800;
     letter-spacing: 2px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .logo span { color: #6ee7ff; }
 
   .tagline {
-    font-size: clamp(0.9rem, 2.5vmin, 1.2rem);
+    font-size: clamp(0.85rem, 2.4vmin, 1.1rem);
     opacity: 0.7;
-    margin-bottom: clamp(16px, 4vh, 40px);
+    margin-bottom: clamp(18px, 4vh, 38px);
+  }
+
+  /* Step eyebrow — tells the viewer exactly where they are */
+  .step {
+    font-size: clamp(0.85rem, 2.4vmin, 1.05rem);
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #6ee7ff;
+    margin-bottom: 10px;
   }
 
   .instruction {
-    font-size: clamp(1.3rem, 4.5vmin, 2.2rem);
-    font-weight: 700;
-    margin-bottom: clamp(14px, 3.5vh, 34px);
+    font-size: clamp(1.5rem, 5vmin, 2.4rem);
+    font-weight: 800;
+    margin-bottom: clamp(14px, 3vh, 24px);
     min-height: 1.4em;
   }
+
+  /* Labeled breath-hold timer — clearly a readout, not a button */
+  .hold-timer {
+    visibility: hidden;
+    background: #ffffff;
+    color: #000;
+    font-size: clamp(1.1rem, 3.4vmin, 1.5rem);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    padding: 10px 26px;
+    border-radius: 999px;
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+    margin-bottom: clamp(16px, 3.2vh, 28px);
+  }
+  .app.holding .hold-timer { visibility: visible; }
 
   /* ====== THE BIG CIRCLE BUTTON ====== */
   .breath-btn {
@@ -107,35 +131,11 @@
     animation: pulse 2.2s ease-in-out infinite;
   }
 
-  /* Holding state: white circle IS the exhale button — a live
-     breath-hold timer you press to stop holding. */
-  .breath-btn.holding {
-    background: #ffffff;
-    box-shadow: 0 0 100px rgba(255, 255, 255, 0.85);
-    animation: none;
+  .breath-btn.exhale {
+    background: radial-gradient(circle at 30% 30%, #4ade80, #15803d);
+    box-shadow: 0 0 60px rgba(74, 222, 128, 0.55);
+    animation: pulse 2.2s ease-in-out infinite;
   }
-
-  .count-num {
-    display: none;
-    font-size: calc(var(--circle) * 0.52);
-    font-weight: 900;
-    line-height: 1;
-    color: #000;
-    font-variant-numeric: tabular-nums;
-  }
-  .count-sub {
-    display: none;
-    font-size: calc(var(--circle) * 0.062);
-    font-weight: 700;
-    color: #000;
-    opacity: 0.65;
-  }
-  .breath-btn.holding .label-wrap { display: none; }
-  .breath-btn.holding .count-num {
-    display: block;
-    animation: pop 0.4s ease;
-  }
-  .breath-btn.holding .count-sub { display: block; }
 
   .label-wrap {
     display: flex;
@@ -146,7 +146,6 @@
 
   /* Tapping finger guide */
   .tap-hint {
-    display: none;
     position: absolute;
     bottom: -14%;
     left: 55%;
@@ -155,10 +154,6 @@
     pointer-events: none;
     filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
     z-index: 5;
-  }
-  .breath-btn.inhale .tap-hint,
-  .breath-btn.holding .tap-hint {
-    display: block;
     animation: tap 0.8s ease-in-out infinite;
   }
   @keyframes tap {
@@ -169,10 +164,6 @@
   @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
-  }
-  @keyframes pop {
-    0% { transform: scale(1.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
   }
 
   /* ====== UPGRADE POPUP ====== */
@@ -282,11 +273,14 @@
 </head>
 <body>
 
-  <main class="app">
+  <main class="app" id="app">
     <div class="logo">Breathe<span>OS</span>™</div>
     <div class="tagline">Disrupting respiration since 2026</div>
 
-    <div class="instruction" id="instruction">Press &amp; inhale</div>
+    <div class="step" id="stepLabel">STEP 1 OF 2</div>
+    <div class="instruction" id="instruction">Tap the button &amp; breathe in</div>
+
+    <div class="hold-timer" id="holdTimer">⏱ Holding for 0s</div>
 
     <button class="breath-btn inhale" id="circleBtn">
       <span class="label-wrap">
@@ -294,8 +288,6 @@
         <span class="big-label" id="bigLabel">Breathe in</span>
         <span class="sub-label" id="subLabel">press &amp; inhale</span>
       </span>
-      <span class="count-num" id="countNum">1</span>
-      <span class="count-sub">press &amp; exhale</span>
       <span class="tap-hint">👆</span>
     </button>
   </main>
@@ -319,15 +311,20 @@
   </div>
 
 <script>
+  const app         = document.getElementById('app');
   const circleBtn   = document.getElementById('circleBtn');
-  const countNum    = document.getElementById('countNum');
+  const btnIcon     = document.getElementById('btnIcon');
+  const bigLabel    = document.getElementById('bigLabel');
+  const subLabel    = document.getElementById('subLabel');
+  const stepLabel   = document.getElementById('stepLabel');
   const instruction = document.getElementById('instruction');
+  const holdTimer   = document.getElementById('holdTimer');
   const overlay     = document.getElementById('overlay');
   const upgradeBtn  = document.getElementById('upgradeBtn');
   const declineBtn  = document.getElementById('declineBtn');
 
-  let state = 'inhale'; // inhale -> holding (timer + exhale button in one)
-  let seconds = 1;
+  let state = 'inhale'; // inhale -> holding
+  let seconds = 0;
   let timer = null;
 
   circleBtn.addEventListener('click', () => {
@@ -337,26 +334,26 @@
 
   function startHolding() {
     state = 'holding';
+    app.classList.add('holding');
+
+    // The button flips into the breathe-out button
     circleBtn.classList.remove('inhale');
-    circleBtn.classList.add('holding');
-    instruction.textContent = 'Holding… press to breathe out';
+    circleBtn.classList.add('exhale');
+    btnIcon.textContent = '😮‍💨';
+    bigLabel.textContent = 'Breathe out';
+    subLabel.textContent = 'press & exhale';
 
-    seconds = 1;
-    showNumber(seconds);
+    stepLabel.textContent = 'STEP 2 OF 2';
+    instruction.textContent = 'Hold it… tap to breathe out';
 
-    // The timer never stops on its own — exhaling is a premium feature.
+    // Labeled stopwatch of how long you've been holding your breath.
+    // It never stops on its own — exhaling is a premium feature.
+    seconds = 0;
+    holdTimer.textContent = '⏱ Holding for 0s';
     timer = setInterval(() => {
       seconds++;
-      showNumber(seconds);
+      holdTimer.textContent = '⏱ Holding for ' + seconds + 's';
     }, 1000);
-  }
-
-  function showNumber(n) {
-    countNum.textContent = n;
-    countNum.style.fontSize = n >= 100 ? 'calc(var(--circle) * 0.36)' : '';
-    countNum.style.animation = 'none';
-    void countNum.offsetWidth; // restart pop animation
-    countNum.style.animation = 'pop 0.4s ease';
   }
 
   upgradeBtn.addEventListener('click', () => {
