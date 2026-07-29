@@ -352,8 +352,8 @@
     circleBtn.classList.remove('inhale');
     circleBtn.classList.add('exhale', 'locked');
     circleBtn.disabled = true;
-    btnIcon.textContent = '😮‍💨';
-    bigLabel.textContent = 'I need air!';
+    btnIcon.style.display = 'none';
+    bigLabel.textContent = 'Keep holding';
 
     let lock = 3;
     subLabel.textContent = 'unlocks in ' + lock + '…';
@@ -365,6 +365,8 @@
         clearInterval(lockTimer);
         circleBtn.classList.remove('locked');
         circleBtn.disabled = false;
+        bigLabel.textContent = 'Press to breathe…';
+        bigLabel.style.fontSize = 'calc(var(--circle) * 0.1)';
         subLabel.textContent = 'tap to breathe out';
       }
     }, 1000);
