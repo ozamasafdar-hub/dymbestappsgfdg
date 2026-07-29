@@ -137,7 +137,7 @@
     animation: pulse 2.2s ease-in-out infinite;
   }
 
-  /* Locked: exhale button greyed out for the first 3 seconds of the hold */
+  /* Locked: exhale button greyed out for the first 5 seconds of the hold */
   .breath-btn.locked {
     background: radial-gradient(circle at 30% 30%, #9ca3af, #4b5563);
     box-shadow: 0 0 30px rgba(148, 163, 184, 0.3);
@@ -147,6 +147,38 @@
   }
   .breath-btn.locked:active { transform: none; }
   .breath-btn.locked .tap-hint { display: none; }
+
+  /* Loading ring around the locked button, fills over the 5s lock */
+  .ring {
+    display: none;
+    position: absolute;
+    top: -6%;
+    left: -6%;
+    width: 112%;
+    height: 112%;
+    pointer-events: none;
+    transform: rotate(-90deg); /* progress starts at 12 o'clock */
+  }
+  .breath-btn.locked .ring { display: block; }
+  .ring .ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.18);
+    stroke-width: 4;
+  }
+  .ring .ring-fg {
+    fill: none;
+    stroke: #6ee7ff;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 301.59;   /* circumference of r=48 circle */
+    stroke-dashoffset: 301.59;
+  }
+  .breath-btn.locked .ring .ring-fg {
+    animation: ringFill 5s linear forwards;
+  }
+  @keyframes ringFill {
+    to { stroke-dashoffset: 0; }
+  }
 
   .label-wrap {
     display: flex;
@@ -279,6 +311,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .breath-btn, .upgrade-btn, .tap-hint { animation: none; }
+    .breath-btn.locked .ring .ring-fg { animation: none; stroke-dashoffset: 0; }
   }
 </style>
 </head>
@@ -294,6 +327,10 @@
     <div class="hold-timer" id="holdTimer">⏱ Holding for 0s</div>
 
     <button class="breath-btn inhale" id="circleBtn">
+      <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+        <circle class="ring-bg" cx="50" cy="50" r="48"/>
+        <circle class="ring-fg" cx="50" cy="50" r="48"/>
+      </svg>
       <span class="label-wrap">
         <span class="btn-icon" id="btnIcon">🫁</span>
         <span class="big-label" id="bigLabel">Breathe in</span>
@@ -348,14 +385,14 @@
     app.classList.add('holding');
 
     // The button flips into the breathe-out button, greyed out
-    // for the first 3 seconds so you HAVE to hold.
+    // for the first 5 seconds so you HAVE to hold.
     circleBtn.classList.remove('inhale');
     circleBtn.classList.add('exhale', 'locked');
     circleBtn.disabled = true;
     btnIcon.style.display = 'none';
     bigLabel.textContent = 'Keep holding';
 
-    let lock = 3;
+    let lock = 5;
     subLabel.textContent = 'unlocks in ' + lock + '…';
     const lockTimer = setInterval(() => {
       lock--;
