@@ -47,16 +47,16 @@
   }
 
   .instruction {
-    font-size: clamp(1.3rem, 4vw, 2rem);
+    font-size: clamp(1.4rem, 4.5vw, 2.2rem);
     font-weight: 700;
-    margin-bottom: 30px;
+    margin-bottom: 34px;
     min-height: 1.4em;
   }
 
-  /* ====== THE BIG BUTTONS ====== */
+  /* ====== THE BIG CIRCLE BUTTON ====== */
   .breath-btn {
-    width: min(70vw, 340px);
-    height: min(70vw, 340px);
+    width: min(72vw, 360px);
+    height: min(72vw, 360px);
     border-radius: 50%;
     border: none;
     cursor: pointer;
@@ -68,65 +68,69 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: transform 0.15s ease, box-shadow 0.3s ease;
+    transition: transform 0.15s ease, box-shadow 0.3s ease, background 0.3s ease;
     outline: none;
-    touch-action: none;
   }
+  .breath-btn:active { transform: scale(0.95); }
 
   .breath-btn .big-label {
-    font-size: clamp(2.2rem, 8vw, 3.6rem);
+    font-size: clamp(2.4rem, 9vw, 3.8rem);
     letter-spacing: 3px;
   }
   .breath-btn .sub-label {
-    font-size: clamp(0.95rem, 3vw, 1.3rem);
+    font-size: clamp(1rem, 3.2vw, 1.35rem);
     font-weight: 600;
     opacity: 0.85;
   }
 
-  #inhaleBtn {
+  .breath-btn.inhale {
     background: radial-gradient(circle at 30% 30%, #38bdf8, #0369a1);
     box-shadow: 0 0 60px rgba(56, 189, 248, 0.55);
     animation: pulse 2.2s ease-in-out infinite;
   }
-  #inhaleBtn:active, #inhaleBtn.holding {
-    transform: scale(1.12);
-    box-shadow: 0 0 110px rgba(56, 189, 248, 0.95);
-    animation: none;
-  }
 
-  #exhaleBtn {
+  .breath-btn.exhale {
     background: radial-gradient(circle at 30% 30%, #4ade80, #15803d);
     box-shadow: 0 0 60px rgba(74, 222, 128, 0.55);
     animation: pulse 2.2s ease-in-out infinite;
-    display: none;
   }
-  #exhaleBtn:active { transform: scale(0.95); }
+
+  /* Counting state: full white circle, giant black number inside */
+  .breath-btn.counting {
+    background: #ffffff;
+    box-shadow: 0 0 100px rgba(255, 255, 255, 0.85);
+    animation: none;
+    cursor: default;
+  }
+  .breath-btn.counting:active { transform: none; }
+
+  .count-num {
+    display: none;
+    font-size: clamp(8rem, 40vw, 15rem);
+    font-weight: 900;
+    line-height: 1;
+    color: #000;
+  }
+  .breath-btn.counting .label-wrap { display: none; }
+  .breath-btn.counting .count-num {
+    display: block;
+    animation: pop 0.4s ease;
+  }
+
+  .label-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
 
   @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
   }
-
-  /* ====== COUNTDOWN ====== */
-  .countdown {
-    font-size: clamp(6rem, 25vw, 12rem);
-    font-weight: 900;
-    line-height: 1;
-    color: #6ee7ff;
-    text-shadow: 0 0 50px rgba(110, 231, 255, 0.8);
-    display: none;
-    animation: pop 0.5s ease;
-  }
   @keyframes pop {
-    0% { transform: scale(1.6); opacity: 0; }
+    0% { transform: scale(1.5); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
-  }
-
-  .hold-hint {
-    margin-top: 26px;
-    font-size: clamp(1rem, 3vw, 1.3rem);
-    opacity: 0.6;
-    min-height: 1.4em;
   }
 
   /* ====== UPGRADE POPUP ====== */
@@ -226,6 +230,10 @@
     opacity: 0.35;
     line-height: 1.5;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .breath-btn, .upgrade-btn { animation: none; }
+  }
 </style>
 </head>
 <body>
@@ -233,21 +241,15 @@
   <div class="logo">Breathe<span>OS</span>™</div>
   <div class="tagline">Disrupting respiration since 2026</div>
 
-  <div class="instruction" id="instruction">Press &amp; hold to inhale</div>
+  <div class="instruction" id="instruction">Press &amp; inhale</div>
 
-  <div class="countdown" id="countdown">3</div>
-
-  <button class="breath-btn" id="inhaleBtn">
-    <span class="big-label">INHALE</span>
-    <span class="sub-label">hold for 3 seconds</span>
+  <button class="breath-btn inhale" id="circleBtn">
+    <span class="label-wrap">
+      <span class="big-label" id="bigLabel">INHALE</span>
+      <span class="sub-label" id="subLabel">press &amp; inhale</span>
+    </span>
+    <span class="count-num" id="countNum">3</span>
   </button>
-
-  <button class="breath-btn" id="exhaleBtn">
-    <span class="big-label">EXHALE</span>
-    <span class="sub-label">press &amp; exhale</span>
-  </button>
-
-  <div class="hold-hint" id="holdHint">Keep holding… don't let go</div>
 
   <!-- ====== UPGRADE POPUP ====== -->
   <div class="overlay" id="overlay">
@@ -268,74 +270,57 @@
   </div>
 
 <script>
-  const inhaleBtn   = document.getElementById('inhaleBtn');
-  const exhaleBtn   = document.getElementById('exhaleBtn');
-  const countdown   = document.getElementById('countdown');
+  const circleBtn   = document.getElementById('circleBtn');
+  const bigLabel    = document.getElementById('bigLabel');
+  const subLabel    = document.getElementById('subLabel');
+  const countNum    = document.getElementById('countNum');
   const instruction = document.getElementById('instruction');
-  const holdHint    = document.getElementById('holdHint');
   const overlay     = document.getElementById('overlay');
   const upgradeBtn  = document.getElementById('upgradeBtn');
   const declineBtn  = document.getElementById('declineBtn');
 
-  let holdTimer = null;
-  let tickTimer = null;
-  let count = 3;
+  let state = 'inhale'; // inhale -> counting -> exhale
 
-  function startHold(e) {
-    e.preventDefault();
-    // Keep receiving pointer events even though the countdown pushes the
-    // button down mid-hold, so the hold isn't cancelled by the layout shift.
-    try { inhaleBtn.setPointerCapture(e.pointerId); } catch (err) {}
-    inhaleBtn.classList.add('holding');
-    instruction.textContent = 'Inhaling…';
-    holdHint.textContent = "Keep holding… don't let go";
-    count = 3;
-    countdown.textContent = count;
-    countdown.style.display = 'block';
+  circleBtn.addEventListener('click', () => {
+    if (state === 'inhale') startCountdown();
+    else if (state === 'exhale') overlay.classList.add('show');
+  });
 
-    tickTimer = setInterval(() => {
+  function startCountdown() {
+    state = 'counting';
+    circleBtn.classList.remove('inhale');
+    circleBtn.classList.add('counting');
+    instruction.textContent = 'Inhaling… hold it';
+
+    let count = 3;
+    showNumber(count);
+
+    const timer = setInterval(() => {
       count--;
       if (count > 0) {
-        countdown.textContent = count;
-        countdown.style.animation = 'none';
-        void countdown.offsetWidth; // restart pop animation
-        countdown.style.animation = 'pop 0.5s ease';
+        showNumber(count);
+      } else {
+        clearInterval(timer);
+        becomeExhale();
       }
     }, 1000);
-
-    holdTimer = setTimeout(finishInhale, 3000);
   }
 
-  function cancelHold() {
-    if (!holdTimer) return;
-    clearTimeout(holdTimer); holdTimer = null;
-    clearInterval(tickTimer); tickTimer = null;
-    inhaleBtn.classList.remove('holding');
-    countdown.style.display = 'none';
-    instruction.textContent = 'Press & hold to inhale';
-    holdHint.textContent = 'You let go too early. Breathing takes commitment.';
+  function showNumber(n) {
+    countNum.textContent = n;
+    countNum.style.animation = 'none';
+    void countNum.offsetWidth; // restart pop animation
+    countNum.style.animation = 'pop 0.4s ease';
   }
 
-  function finishInhale() {
-    clearInterval(tickTimer); tickTimer = null;
-    holdTimer = null;
-    inhaleBtn.classList.remove('holding');
-    countdown.style.display = 'none';
-    inhaleBtn.style.display = 'none';
-    exhaleBtn.style.display = 'flex';
-    instruction.textContent = 'Great inhale! Now release…';
-    holdHint.textContent = '';
+  function becomeExhale() {
+    state = 'exhale';
+    circleBtn.classList.remove('counting');
+    circleBtn.classList.add('exhale');
+    bigLabel.textContent = 'EXHALE';
+    subLabel.textContent = 'press & exhale';
+    instruction.textContent = 'Now exhale';
   }
-
-  inhaleBtn.addEventListener('pointerdown', startHold);
-  inhaleBtn.addEventListener('pointerup', cancelHold);
-  inhaleBtn.addEventListener('pointerleave', cancelHold);
-  inhaleBtn.addEventListener('pointercancel', cancelHold);
-  inhaleBtn.addEventListener('contextmenu', e => e.preventDefault());
-
-  exhaleBtn.addEventListener('click', () => {
-    overlay.classList.add('show');
-  });
 
   upgradeBtn.addEventListener('click', () => {
     upgradeBtn.textContent = 'Processing… please continue holding breath';
@@ -343,10 +328,12 @@
 
   declineBtn.addEventListener('click', () => {
     overlay.classList.remove('show');
-    exhaleBtn.style.display = 'none';
-    inhaleBtn.style.display = 'flex';
-    instruction.textContent = 'Press & hold to inhale';
-    holdHint.textContent = 'Exhale canceled. Air retained.';
+    state = 'inhale';
+    circleBtn.classList.remove('exhale');
+    circleBtn.classList.add('inhale');
+    bigLabel.textContent = 'INHALE';
+    subLabel.textContent = 'press & inhale';
+    instruction.textContent = 'Press & inhale';
     upgradeBtn.textContent = 'Upgrade to Exhale';
   });
 </script>
