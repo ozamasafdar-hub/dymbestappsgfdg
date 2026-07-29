@@ -92,8 +92,8 @@
     line-height: 1;
   }
   .breath-btn .big-label {
-    font-size: calc(var(--circle) * 0.17);
-    letter-spacing: 3px;
+    font-size: calc(var(--circle) * 0.125);
+    letter-spacing: 1px;
   }
   .breath-btn .sub-label {
     font-size: calc(var(--circle) * 0.062);
@@ -288,7 +288,7 @@
     <button class="breath-btn inhale" id="circleBtn">
       <span class="label-wrap">
         <span class="btn-icon" id="btnIcon">🫁</span>
-        <span class="big-label" id="bigLabel">INHALE</span>
+        <span class="big-label" id="bigLabel">Breathe in</span>
         <span class="sub-label" id="subLabel">press &amp; inhale</span>
       </span>
       <span class="count-num" id="countNum">3</span>
@@ -364,7 +364,7 @@
     circleBtn.classList.remove('counting');
     circleBtn.classList.add('exhale');
     btnIcon.textContent = '😮‍💨';
-    bigLabel.textContent = 'EXHALE';
+    bigLabel.textContent = 'Breathe out';
     subLabel.textContent = 'press & exhale';
     instruction.textContent = 'Now exhale';
   }
@@ -379,7 +379,7 @@
     circleBtn.classList.remove('exhale');
     circleBtn.classList.add('inhale');
     btnIcon.textContent = '🫁';
-    bigLabel.textContent = 'INHALE';
+    bigLabel.textContent = 'Breathe in';
     subLabel.textContent = 'press & inhale';
     instruction.textContent = 'Press & inhale';
     upgradeBtn.textContent = 'Upgrade to Exhale';
