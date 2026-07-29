@@ -340,11 +340,11 @@
     circleBtn.classList.remove('inhale');
     circleBtn.classList.add('exhale');
     btnIcon.textContent = '😮‍💨';
-    bigLabel.textContent = 'Breathe out';
-    subLabel.textContent = 'press & exhale';
+    bigLabel.textContent = 'I need air!';
+    subLabel.textContent = 'tap to breathe out';
 
     stepLabel.textContent = 'STEP 2 OF 2';
-    instruction.textContent = 'Hold it… tap to breathe out';
+    instruction.textContent = 'Now hold your breath…';
 
     // Labeled stopwatch of how long you've been holding your breath.
     // It never stops on its own — exhaling is a premium feature.
@@ -363,7 +363,7 @@
   declineBtn.addEventListener('click', () => {
     // No exhale for you — back to the still-running breath-hold timer.
     overlay.classList.remove('show');
-    instruction.textContent = 'Still holding…';
+    instruction.textContent = 'Keep holding…';
     upgradeBtn.textContent = 'Upgrade to Exhale';
   });
 </script>
