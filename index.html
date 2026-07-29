@@ -55,6 +55,7 @@
 
   /* ====== THE BIG CIRCLE BUTTON ====== */
   .breath-btn {
+    position: relative;
     width: min(72vw, 360px);
     height: min(72vw, 360px);
     border-radius: 50%;
@@ -122,6 +123,27 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
+  }
+
+  /* Tapping finger guide, shown only on the exhale button */
+  .tap-hint {
+    display: none;
+    position: absolute;
+    bottom: -14%;
+    left: 55%;
+    font-size: clamp(3.5rem, 15vw, 6rem);
+    line-height: 1;
+    pointer-events: none;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
+    z-index: 5;
+  }
+  .breath-btn.exhale .tap-hint {
+    display: block;
+    animation: tap 0.8s ease-in-out infinite;
+  }
+  @keyframes tap {
+    0%, 100% { transform: translateY(0) scale(1); }
+    45% { transform: translateY(-30px) scale(0.9); }
   }
 
   @keyframes pulse {
@@ -232,7 +254,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .breath-btn, .upgrade-btn { animation: none; }
+    .breath-btn, .upgrade-btn, .breath-btn.exhale .tap-hint { animation: none; }
   }
 </style>
 </head>
@@ -249,6 +271,7 @@
       <span class="sub-label" id="subLabel">press &amp; inhale</span>
     </span>
     <span class="count-num" id="countNum">3</span>
+    <span class="tap-hint">👆</span>
   </button>
 
   <!-- ====== UPGRADE POPUP ====== -->
